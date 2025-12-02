@@ -46,4 +46,12 @@ export async function middleware(req: any) {
     );
   }
 
-  return NextRespon
+  return NextResponse.next();
+}
+
+// Middleware should NOT run on static assets
+export const config = {
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$).*)",
+  ],
+};
