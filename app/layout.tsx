@@ -2,9 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "John Harrell - Indiana High School Sports",
-  description: "Indiana high school football & basketball schedules, results, and data.",
+  description:
+    "Indiana high school football & basketball schedules, results, and data.",
 };
 
 export default function RootLayout({
@@ -21,4 +25,3 @@ export default function RootLayout({
     </html>
   );
 }
-

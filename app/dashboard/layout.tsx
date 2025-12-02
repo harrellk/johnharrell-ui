@@ -1,8 +1,5 @@
-// app/dashboard/layout.tsx
-export default function DashboardLayout({ children }) {
-  return (
-    <div className="p-6">
-      {children}
-    </div>
-  );
+import type { ReactNode } from "react";
+
+export default function DashboardLayout(props: { children: ReactNode }) {
+  return <div className="p-6">{props.children}</div>;
 }

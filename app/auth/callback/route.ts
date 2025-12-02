@@ -1,4 +1,6 @@
+// app/auth/callback/route.ts
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
 export async function GET(request: Request) {
@@ -9,47 +11,31 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${url.origin}/login`);
   }
 
-  // Create a redirect response now (so we can set cookies on it)
-  let response = NextResponse.redirect(`${url.origin}/dashboard`);
+  const cookieStore = cookies();
 
-  // Create Supabase client with a COMPLETE cookie implementation
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name) {
-          return request.headers
-            .get("cookie")
-            ?.split("; ")
-            .find((c) => c.startsWith(`${name}=`))
-            ?.split("=")[1];
+        get(name: string) {
+          return cookieStore.get(name)?.value ?? "";
         },
-        set(name, value, options) {
-          response.cookies.set(name, value, options);
+        set(name: string, value: string, options: any) {
+          try {
+            cookieStore.set({ name, value, ...options });
+          } catch (_) {}
         },
-        remove(name, options) {
-          response.cookies.set(name, "", { ...options, maxAge: 0 });
-        },
-        getAll() {
-          const raw = request.headers.get("cookie")?.split("; ") ?? [];
-          return raw.map((entry) => {
-            const [n, v] = entry.split("=");
-            return { name: n, value: v };
-          });
-        },
-        setAll(cookies) {
-          for (const { name, value } of cookies) {
-            response.cookies.set(name, value);
-          }
+        remove(name: string, options: any) {
+          try {
+            cookieStore.set({ name, value: "", ...options });
+          } catch (_) {}
         },
       },
     }
   );
 
-  // Exchange the magic link code for a session cookie (this is the key!)
   await supabase.auth.exchangeCodeForSession(code);
 
-  // Return the response with session cookie applied
-  return response;
+  return NextResponse.redirect(`${url.origin}/dashboard`);
 }

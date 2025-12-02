@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+function LoginContent() {
   const supabase = supabaseBrowser();
   const params = useSearchParams();
   const redirect = params.get("redirectedFrom") || "/app";
-  
+
   const [email, setEmail] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -16,7 +19,7 @@ export default function LoginPage() {
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${location.origin}/auth/callback` }
+      options: { emailRedirectTo: `${location.origin}/auth/callback` },
     });
 
     if (error) alert(error.message);
@@ -48,5 +51,13 @@ export default function LoginPage() {
         </button>
       </form>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginContent />
+    </Suspense>
   );
 }

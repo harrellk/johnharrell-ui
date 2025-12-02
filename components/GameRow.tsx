@@ -24,7 +24,7 @@ export default function GameRow({
   // Format date
   const d = new Date(game.game_date);
   const dateStr = d.toLocaleDateString("en-US", {
-    month: "M",
+    month: "short",
     day: "numeric",
   });
 

@@ -2,6 +2,9 @@ import { supabaseServer } from "@/lib/supabaseServer";
 import TeamHeader from "@/components/TeamHeader";
 import ScheduleTable from "@/components/ScheduleTable";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function TeamPage({
   params,
 }: {
