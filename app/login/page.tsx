@@ -4,14 +4,10 @@ import { Suspense, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { useSearchParams } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 function LoginContent() {
   const supabase = supabaseBrowser();
   const params = useSearchParams();
-  const redirect = params.get("redirectedFrom") || "/app";
-
+  const redirect = params.get("redirectedFrom") || "/dashboard";
   const [email, setEmail] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -56,7 +52,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<div>Loading...</div>}>
       <LoginContent />
     </Suspense>
   );
