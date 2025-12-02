@@ -4,10 +4,14 @@ import { cookies } from "next/headers";
 
 export async function middleware(req: any) {
   const url = new URL(req.url);
+  const pathname = url.pathname;
 
-  // Allow public routes
-  const publicRoutes = ["/login", "/auth/callback"];
-  if (publicRoutes.some((p) => url.pathname.startsWith(p))) {
+  // PUBLIC ROUTES — allowed without auth
+  const isPublic =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/auth/callback");
+
+  if (isPublic) {
     return NextResponse.next();
   }
 
@@ -35,17 +39,11 @@ export async function middleware(req: any) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // ❌ No user -> redirect to login
   if (!user) {
     return NextResponse.redirect(
-      `${url.origin}/login?redirectedFrom=${url.pathname}`
+      `${url.origin}/login?redirectedFrom=${pathname}`
     );
   }
 
-  return NextResponse.next();
-}
-
-export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$).*)",
-  ],
-};
+  return NextRespon

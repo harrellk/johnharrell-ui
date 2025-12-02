@@ -19,19 +19,21 @@ export async function GET(request: Request) {
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value;
+          return cookieStore.get(name)?.value ?? "";
         },
         set(name: string, value: string, options: any) {
           cookieStore.set(name, value, options);
         },
         remove(name: string, options: any) {
-          cookieStore.delete({ name, ...options });
+          cookieStore.set(name, "", { ...options, maxAge: 0 });
         },
       },
     }
   );
 
+  // 🔥 This EXCHANGES MAGIC LINK CODE FOR A SESSION + sets cookies
   await supabase.auth.exchangeCodeForSession(code);
 
+  // 🔥 Redirect to dashboard AFTER cookie set
   return NextResponse.redirect(`${url.origin}/dashboard`);
 }
