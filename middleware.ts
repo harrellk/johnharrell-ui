@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+// middleware.ts
+import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+export async function middleware(req: Request) {
+  const url = new URL(req.url);
+  const cookieStore = cookies();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,28 +13,41 @@ export async function middleware(req: NextRequest) {
     {
       cookies: {
         get(name: string) {
-          return req.cookies.get(name)?.value;
+          return cookieStore.get(name)?.value;
         },
-        set(name: string, value: string, options: CookieOptions) {
-          res.cookies.set(name, value, options);
+        set(name: string, value: string, options: any) {
+          cookieStore.set(name, value, options);
         },
-        remove(name: string, options: CookieOptions) {
-          res.cookies.set(name, "", { ...options, maxAge: 0 });
+        remove(name: string, options: any) {
+          cookieStore.set(name, "", { ...options, maxAge: 0 });
         },
       },
     }
   );
 
-  // OPTIONAL: if you need auth state here, you can fetch it
-  // const {
-  //   data: { user },
-  // } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return res;
+  // Public routes (allowed without login)
+  const isPublic =
+    url.pathname.startsWith("/login") ||
+    url.pathname.startsWith("/auth/callback");
+
+  // 🚨 If NOT logged-in AND NOT on public route → redirect to login
+  if (!user && !isPublic) {
+    return NextResponse.redirect(
+      `${url.origin}/login?redirectedFrom=${url.pathname}`
+    );
+  }
+
+  // Otherwise allow access
+  return NextResponse.next();
 }
 
-// IMPORTANT: match all routes that need middleware
+// Apply middleware to all non-static routes
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+  ],
 };
-
