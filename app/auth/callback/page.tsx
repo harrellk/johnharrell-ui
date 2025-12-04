@@ -22,8 +22,8 @@ export default function AuthCallbackPage() {
         return;
       }
 
-      // EXCHANGE MAGIC LINK CODE → sets cookies in browser
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      // ⭐ THIS IS THE CORRECT SIGNATURE FOR v0.8.x
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
         console.error("Magic link error:", error);
