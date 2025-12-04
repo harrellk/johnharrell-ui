@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 
 export async function middleware(req: any) {
+  const res = NextResponse.next();
+
   const url = new URL(req.url);
   const pathname = url.pathname;
 
@@ -11,42 +12,28 @@ export async function middleware(req: any) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/auth/callback");
 
-  if (isPublic) {
-    return NextResponse.next();
-  }
-
-  const cookieStore = cookies();
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  // Initialize Supabase client for Edge Middleware
+  const supabase = createMiddlewareClient(
+    { req, res },
     {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: any) {
-          cookieStore.set(name, value, options);
-        },
-        remove(name: string, options: any) {
-          cookieStore.set(name, "", { ...options, maxAge: 0 });
-        },
-      },
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     }
   );
 
+  // Get user session
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // ❌ No user -> redirect to login
-  if (!user) {
+  // Redirect if not logged in
+  if (!user && !isPublic) {
     return NextResponse.redirect(
       `${url.origin}/login?redirectedFrom=${pathname}`
     );
   }
 
-  return NextResponse.next();
+  return res;
 }
 
 // Middleware should NOT run on static assets
