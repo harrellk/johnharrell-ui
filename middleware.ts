@@ -1,42 +1,45 @@
 import { NextResponse } from "next/server";
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@supabase/supabase-js";
 
 export async function middleware(req: any) {
-  const res = NextResponse.next();
-
   const url = new URL(req.url);
   const pathname = url.pathname;
 
-  // PUBLIC ROUTES — allowed without auth
   const isPublic =
     pathname.startsWith("/login") ||
     pathname.startsWith("/auth/callback");
 
-  // Initialize Supabase client for Edge Middleware
-  const supabase = createMiddlewareClient(
-    { req, res },
+  // Create Edge-safe Supabase client
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      auth: { persistSession: false },
     }
   );
 
-  // Get user session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Restore auth session token from cookies manually
+  const token = req.cookies.get("sb-access-token")?.value;
 
-  // Redirect if not logged in
+  if (token) {
+    await supabase.auth.setSession({
+      access_token: token,
+      refresh_token: token,
+    });
+  }
+
+  const { data } = await supabase.auth.getUser();
+  const user = data?.user ?? null;
+
   if (!user && !isPublic) {
     return NextResponse.redirect(
       `${url.origin}/login?redirectedFrom=${pathname}`
     );
   }
 
-  return res;
+  return NextResponse.next();
 }
 
-// Middleware should NOT run on static assets
 export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$).*)",
