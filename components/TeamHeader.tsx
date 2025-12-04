@@ -15,27 +15,26 @@ export default function TeamHeader({ team }: any) {
       <h1 className="text-4xl font-bold text-crimson mb-2">{name}</h1>
 
       {/* City + Mascot */}
-      {city || mascot ? (
-        <p className="text-lg text-gray-200 mb-2">
+      {(city || mascot) && (
+        <p className="text-lg text-gray-600 mb-2">
           {city} {mascot ? `• ${mascot}` : ""}
         </p>
-      ) : null}
+      )}
 
       {/* School Colors */}
       {colors && (
-        <p className="text-gray-400 mb-2">
+        <p className="text-gray-700 mb-1">
           <span className="font-semibold">Colors:</span> {colors}
         </p>
       )}
 
       {/* Stadium */}
       {stadium && (
-        <p className="text-gray-400 mb-2">
+        <p className="text-gray-700 mb-1">
           <span className="font-semibold">Stadium:</span> {stadium}
           {mapsUrl && (
             <>
-              {" "}
-              •{" "}
+              {" "}<span>•</span>{" "}
               <Link
                 href={mapsUrl}
                 target="_blank"
@@ -48,7 +47,7 @@ export default function TeamHeader({ team }: any) {
         </p>
       )}
 
-      <hr className="border-gray-700 mt-4" />
+      <hr className="border-gray-300 mt-4" />
     </div>
   );
 }
