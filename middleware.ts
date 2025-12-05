@@ -26,6 +26,7 @@ export function middleware(req: Request) {
     });
   }
 
+  console.log("Vercel DEV_USERNAME:", process.env.DEV_USERNAME);
   return NextResponse.next();
 }
 
