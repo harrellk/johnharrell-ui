@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
 
 export function middleware(req: Request) {
-  const url = new URL(req.url);
-
-  // Basic Auth
   const basicAuth = req.headers.get("authorization");
 
   if (!basicAuth) {
     return new NextResponse("Authentication required", {
       status: 401,
-      headers: { "WWW-Authenticate": 'Basic realm="Dev Area"' },
+      headers: {
+        "WWW-Authenticate": 'Basic realm="Secure Area"',
+      },
     });
   }
 
-  const authValue = basicAuth.split(" ")[1] ?? "";
-  const [user, pwd] = Buffer.from(authValue, "base64").toString().split(":");
+  const authValue = basicAuth.split(" ")[1] || "";
+  const [user, pwd] = Buffer.from(authValue, "base64")
+    .toString()
+    .split(":");
 
   if (
     user !== process.env.DEV_USERNAME ||
@@ -22,11 +23,12 @@ export function middleware(req: Request) {
   ) {
     return new NextResponse("Invalid credentials", {
       status: 401,
-      headers: { "WWW-Authenticate": 'Basic realm="Dev Area"' },
+      headers: {
+        "WWW-Authenticate": 'Basic realm="Secure Area"',
+      },
     });
   }
 
-  console.log("Vercel DEV_USERNAME:", process.env.DEV_USERNAME);
   return NextResponse.next();
 }
 

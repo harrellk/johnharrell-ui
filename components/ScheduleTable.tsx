@@ -19,21 +19,19 @@ export default function ScheduleTable({
   };
 
   const getGameType = (g: any) => {
-    // John Harrell style classification
-    // g: 1 = Sectional, 2 = Regional, 3 = SemiState, 4 = State
-    if (!g.g) return "Regular";
+    if (!g.tny) return ""; // null or empty → display nothing
 
-    switch (g.g) {
-      case 1:
+    switch (g.tny) {
+      case "sect":
         return "Sectional";
-      case 2:
+      case "regn":
         return "Regional";
-      case 3:
+      case "semi":
         return "Semi-State";
-      case 4:
+      case "state":
         return "State Finals";
       default:
-        return "Regular";
+        return "";
     }
   };
 
