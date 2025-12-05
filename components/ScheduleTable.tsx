@@ -18,24 +18,9 @@ export default function ScheduleTable({
     return `${date.getMonth() + 1}/${date.getDate()}`;
   };
 
-  const getGameType = (g: any) => {
-    if (!g.tny) return ""; // null or empty → display nothing
+const getGameType = (g: any) => g.tny ?? "";
 
-    switch (g.tny) {
-      case "sect":
-        return "Sectional";
-      case "regn":
-        return "Regional";
-      case "semi":
-        return "Semi-State";
-      case "state":
-        return "State Finals";
-      default:
-        return "";
-    }
-  };
-
-  return (
+return (
     <div className="overflow-x-auto mt-4">
       <table className="min-w-full text-sm">
         <thead>
