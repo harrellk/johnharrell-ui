@@ -1,4 +1,4 @@
-import { supabaseServer } from "@/lib/supabaseServer";
+import { supabase } from "@/lib/supabaseClient";
 import TeamHeader from "@/components/TeamHeader";
 import ScheduleTable from "@/components/ScheduleTable";
 
@@ -12,9 +12,6 @@ export default async function TeamPage({
 }) {
   const { cn } = params;
   const teamCn = parseInt(cn, 10);
-
-  // SERVER-SIDE Supabase client
-  const supabase = supabaseServer();
 
   // Fetch team info
   const { data: team } = await supabase

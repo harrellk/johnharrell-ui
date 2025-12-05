@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabaseBrowser } from "@/lib/supabaseBrowser";
+import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 
 export default function TeamSearch({ sport }: { sport: string }) {
-  const supabase = supabaseBrowser();  // ✅ now defined
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
