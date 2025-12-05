@@ -15,7 +15,7 @@ export default function TeamSearch({ sport }: { sport: string }) {
       setResults([]);
       return;
     }
-
+ 
     const delay = setTimeout(() => {
       searchTeams(query);
     }, 300);
